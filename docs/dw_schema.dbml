@@ -1,0 +1,190 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+// BigDataSnowflake warehouse schema
+
+// Staging/source table loaded from CSV files
+Table public.mock_data {
+  id text
+  customer_first_name text
+  customer_last_name text
+  customer_age text
+  customer_email text
+  customer_country text
+  customer_postal_code text
+  customer_pet_type text
+  customer_pet_name text
+  customer_pet_breed text
+  seller_first_name text
+  seller_last_name text
+  seller_email text
+  seller_country text
+  seller_postal_code text
+  product_name text
+  product_category text
+  product_price text
+  product_quantity text
+  sale_date text
+  sale_customer_id text
+  sale_seller_id text
+  sale_product_id text
+  sale_quantity text
+  sale_total_price text
+  store_name text
+  store_location text
+  store_city text
+  store_state text
+  store_country text
+  store_phone text
+  store_email text
+  pet_category text
+  product_weight text
+  product_color text
+  product_size text
+  product_brand text
+  product_material text
+  product_description text
+  product_rating text
+  product_reviews text
+  product_release_date text
+  product_expiry_date text
+  supplier_name text
+  supplier_contact text
+  supplier_email text
+  supplier_phone text
+  supplier_address text
+  supplier_city text
+  supplier_country text
+}
+
+Table dw.dim_pet_type {
+  pet_type_key bigint [pk, increment]
+  pet_type_name text [not null, unique]
+}
+
+Table dw.dim_pet_breed {
+  pet_breed_key bigint [pk, increment]
+  pet_breed_name text [not null]
+  pet_type_key bigint
+
+  Indexes {
+    (pet_breed_name, pet_type_key) [unique]
+  }
+}
+
+Table dw.dim_customer {
+  customer_key bigint [pk, increment]
+  customer_source_id bigint [not null, unique]
+  first_name text
+  last_name text
+  age int
+  email text
+  country text
+  postal_code text
+  pet_name text
+  pet_type_key bigint
+  pet_breed_key bigint
+}
+
+Table dw.dim_date {
+  date_key bigint [pk, increment]
+  full_date date [not null, unique]
+  day_num int [not null]
+  month_num int [not null]
+  year_num int [not null]
+  quarter_num int [not null]
+}
+
+Table dw.dim_product_category {
+  category_key bigint [pk, increment]
+  product_category_name text [not null]
+  pet_category_name text [not null]
+
+  Indexes {
+    (product_category_name, pet_category_name) [unique]
+  }
+}
+
+Table dw.dim_product {
+  product_key bigint [pk, increment]
+  product_source_id bigint [not null, unique]
+  product_name text
+  category_key bigint
+  price numeric(12,2)
+  stock_quantity int
+  weight numeric(10,2)
+  color text
+  size text
+  brand text
+  material text
+  description text
+  rating numeric(3,1)
+  reviews_count int
+  release_date date
+  expiry_date date
+}
+
+Table dw.dim_seller {
+  seller_key bigint [pk, increment]
+  seller_source_id bigint [not null, unique]
+  first_name text
+  last_name text
+  email text
+  country text
+  postal_code text
+}
+
+Table dw.dim_store {
+  store_key bigint [pk, increment]
+  store_name text [not null]
+  store_location text [not null, default: '']
+  store_city text [not null, default: '']
+  store_state text [not null, default: '']
+  store_country text [not null, default: '']
+  store_phone text
+  store_email text
+
+  Indexes {
+    (store_name, store_location, store_city, store_state, store_country) [unique]
+  }
+}
+
+Table dw.dim_supplier {
+  supplier_key bigint [pk, increment]
+  supplier_name text [not null]
+  supplier_contact text [not null, default: '']
+  supplier_email text
+  supplier_phone text
+  supplier_address text
+  supplier_city text [not null, default: '']
+  supplier_country text [not null, default: '']
+
+  Indexes {
+    (supplier_name, supplier_contact, supplier_city, supplier_country) [unique]
+  }
+}
+
+Table dw.fact_sales {
+  sale_key bigint [pk, increment]
+  source_row_id bigint [not null, unique]
+  date_key bigint [not null]
+  customer_key bigint [not null]
+  seller_key bigint [not null]
+  product_key bigint [not null]
+  store_key bigint [not null]
+  supplier_key bigint [not null]
+  sale_quantity int [not null]
+  unit_price numeric(12,2) [not null]
+  total_price numeric(12,2) [not null]
+}
+
+Ref: dw.dim_pet_breed.pet_type_key > dw.dim_pet_type.pet_type_key
+Ref: dw.dim_customer.pet_type_key > dw.dim_pet_type.pet_type_key
+Ref: dw.dim_customer.pet_breed_key > dw.dim_pet_breed.pet_breed_key
+Ref: dw.dim_product.category_key > dw.dim_product_category.category_key
+
+Ref: dw.fact_sales.date_key > dw.dim_date.date_key
+Ref: dw.fact_sales.customer_key > dw.dim_customer.customer_key
+Ref: dw.fact_sales.seller_key > dw.dim_seller.seller_key
+Ref: dw.fact_sales.product_key > dw.dim_product.product_key
+Ref: dw.fact_sales.store_key > dw.dim_store.store_key
+Ref: dw.fact_sales.supplier_key > dw.dim_supplier.supplier_key
