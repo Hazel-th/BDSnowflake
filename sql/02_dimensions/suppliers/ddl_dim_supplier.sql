@@ -6,6 +6,6 @@ CREATE TABLE dw.dim_supplier (
     supplier_phone TEXT,
     supplier_address TEXT,
     supplier_city TEXT NOT NULL DEFAULT '',
-    supplier_country TEXT NOT NULL DEFAULT '',
-    UNIQUE (supplier_name, supplier_contact, supplier_city, supplier_country)
+    country_key BIGINT NOT NULL REFERENCES dw.dim_country(country_key),
+    UNIQUE (supplier_name, supplier_contact, supplier_city, country_key)
 );

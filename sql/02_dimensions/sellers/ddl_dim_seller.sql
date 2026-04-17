@@ -4,6 +4,6 @@ CREATE TABLE dw.dim_seller (
     first_name TEXT,
     last_name TEXT,
     email TEXT,
-    country TEXT,
+    country_key BIGINT REFERENCES dw.dim_country(country_key),
     postal_code TEXT
 );

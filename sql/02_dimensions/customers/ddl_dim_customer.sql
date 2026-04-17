@@ -5,7 +5,7 @@ CREATE TABLE dw.dim_customer (
     last_name TEXT,
     age INT,
     email TEXT,
-    country TEXT,
+    country_key BIGINT REFERENCES dw.dim_country(country_key),
     postal_code TEXT,
     pet_name TEXT,
     pet_type_key BIGINT REFERENCES dw.dim_pet_type(pet_type_key),

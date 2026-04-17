@@ -4,7 +4,7 @@ INSERT INTO dw.dim_customer (
     last_name,
     age,
     email,
-    country,
+    country_key,
     postal_code,
     pet_name,
     pet_type_key,
@@ -16,12 +16,14 @@ SELECT DISTINCT ON (m.sale_customer_id)
     m.customer_last_name AS last_name,
     m.customer_age::INT AS age,
     m.customer_email AS email,
-    m.customer_country AS country,
+    dc.country_key,
     m.customer_postal_code AS postal_code,
     m.customer_pet_name AS pet_name,
     pt.pet_type_key,
     pb.pet_breed_key
 FROM public.mock_data m
+LEFT JOIN dw.dim_country dc
+    ON dc.country_name = m.customer_country
 LEFT JOIN dw.dim_pet_type pt
     ON pt.pet_type_name = m.customer_pet_type
 LEFT JOIN dw.dim_pet_breed pb

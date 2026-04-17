@@ -5,13 +5,13 @@ INSERT INTO dw.dim_supplier (
     supplier_phone,
     supplier_address,
     supplier_city,
-    supplier_country
+    country_key
 )
 SELECT DISTINCT ON (
     m.supplier_name,
     COALESCE(m.supplier_contact, ''),
     COALESCE(m.supplier_city, ''),
-    COALESCE(m.supplier_country, '')
+    dc.country_key
 )
     m.supplier_name AS supplier_name,
     COALESCE(m.supplier_contact, '') AS supplier_contact,
@@ -19,12 +19,14 @@ SELECT DISTINCT ON (
     m.supplier_phone AS supplier_phone,
     m.supplier_address AS supplier_address,
     COALESCE(m.supplier_city, '') AS supplier_city,
-    COALESCE(m.supplier_country, '') AS supplier_country
+    dc.country_key
 FROM public.mock_data m
+LEFT JOIN dw.dim_country dc
+    ON dc.country_name = COALESCE(m.supplier_country, '')
 WHERE m.supplier_name IS NOT NULL
 ORDER BY
     m.supplier_name,
     COALESCE(m.supplier_contact, ''),
     COALESCE(m.supplier_city, ''),
-    COALESCE(m.supplier_country, ''),
+    dc.country_key,
     m.id;
